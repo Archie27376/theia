@@ -542,6 +542,7 @@ export interface CallHierarchyItem {
     uri: UriComponents;
     range: Range;
     selectionRange: Range;
+    tags: readonly SymbolTag[];
 }
 
 export interface CallHierarchyIncomingCall {
