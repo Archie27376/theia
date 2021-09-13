@@ -525,6 +525,7 @@ export interface CallHierarchyDefinition {
     uri: UriComponents;
     range: Range;
     selectionRange: Range;
+    tags: readonly SymbolTag[];
 }
 
 export interface CallHierarchyReference {
