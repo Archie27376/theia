@@ -44,6 +44,7 @@ import { WebviewOptions, WebviewPanelOptions, ViewColumn } from '@theia/plugin';
 import { WebviewWidgetIdentifier } from '../webview/webview';
 import { EditorPreferences } from '@theia/editor/lib/browser';
 import { EditorPosition } from '../../../common/plugin-api-rpc';
+import { BinaryBuffer } from '@theia/core/lib/common/buffer';
 
 const enum CustomEditorModelType {
     Custom,
@@ -63,6 +64,7 @@ export class CustomEditorsMainImpl implements CustomEditorsMain, Disposable {
     protected readonly editorPreferences: EditorPreferences;
     private readonly proxy: CustomEditorsExt;
     private readonly editorProviders = new Map<string, Disposable>();
+    private readonly options: { backupId?: string };
 
     constructor(rpc: RPCProtocol,
         container: interfaces.Container,
@@ -79,6 +81,7 @@ export class CustomEditorsMainImpl implements CustomEditorsMain, Disposable {
         this.editorPreferences = container.get(EditorPreferences);
         this.widgetManager = container.get(WidgetManager);
         this.proxy = rpc.getProxy(MAIN_RPC_CONTEXT.CUSTOM_EDITORS_EXT);
+        this.options = {};
     }
 
     dispose(): void {
@@ -189,7 +192,7 @@ export class CustomEditorsMainImpl implements CustomEditorsMain, Disposable {
                 return this.customEditorService.models.add(resource, viewType, model);
             }
             case CustomEditorModelType.Custom: {
-                const model = MainCustomEditorModel.create(this.proxy, viewType, resource, this.undoRedoService, this.fileService, this.editorPreferences, cancellationToken);
+                const model = MainCustomEditorModel.create(this.proxy, viewType, resource, this.undoRedoService, this.fileService, this.editorPreferences, cancellationToken, this.options);
                 return this.customEditorService.models.add(resource, viewType, model);
             }
         }
@@ -266,6 +269,7 @@ export class MainCustomEditorModel implements CustomEditorModel {
 
     autoSave: 'on' | 'off';
     autoSaveDelay: number;
+    static editorManager: any;
 
     static async create(
         proxy: CustomEditorsExt,
@@ -275,8 +279,14 @@ export class MainCustomEditorModel implements CustomEditorModel {
         fileService: FileService,
         editorPreferences: EditorPreferences,
         cancellation: CancellationToken,
+        options: { backupId?: string },
     ): Promise<MainCustomEditorModel> {
-        const { editable } = await proxy.$createCustomDocument(URI.file(resource.path.toString()), viewType, undefined, cancellation);
+        const editors = this.editorManager.all;
+        let untitledDocumentData: BinaryBuffer | undefined;
+        if (editors.length !== 0) {
+            untitledDocumentData = editors[0].untitledDocumentData;
+        }
+        const { editable } = await proxy.$createCustomDocument(URI.file(resource.path.toString()), viewType, options.backupId, untitledDocumentData, cancellation);
         return new MainCustomEditorModel(proxy, viewType, resource, editable, undoRedoService, fileService, editorPreferences);
     }
 

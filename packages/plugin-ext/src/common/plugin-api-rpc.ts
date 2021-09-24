@@ -1559,7 +1559,7 @@ export interface CustomEditorsExt {
         position: number,
         options: theia.WebviewPanelOptions,
         cancellation: CancellationToken): Promise<void>;
-    $createCustomDocument(resource: UriComponents, viewType: string, backupId: string | undefined, cancellation: CancellationToken): Promise<{ editable: boolean }>;
+    $createCustomDocument(resource: UriComponents, viewType: string, backupId: string | undefined, untitledDocumentData: BinaryBuffer | undefined, cancellation: CancellationToken): Promise<{ editable: boolean }>;
     $disposeCustomDocument(resource: UriComponents, viewType: string): Promise<void>;
     $undo(resource: UriComponents, viewType: string, editId: number, isDirty: boolean): Promise<void>;
     $redo(resource: UriComponents, viewType: string, editId: number, isDirty: boolean): Promise<void>;
@@ -1567,7 +1567,7 @@ export interface CustomEditorsExt {
     $disposeEdits(resourceComponents: UriComponents, viewType: string, editIds: number[]): void;
     $onSave(resource: UriComponents, viewType: string, cancellation: CancellationToken): Promise<void>;
     $onSaveAs(resource: UriComponents, viewType: string, targetResource: UriComponents, cancellation: CancellationToken): Promise<void>;
-    // $backup(resource: UriComponents, viewType: string, cancellation: CancellationToken): Promise<string>;
+    $backup(resource: UriComponents, viewType: string, cancellation: CancellationToken): Promise<string>;
     $onMoveCustomEditor(handle: string, newResource: UriComponents, viewType: string): Promise<void>;
 }
 

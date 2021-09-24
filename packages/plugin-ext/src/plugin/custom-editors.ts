@@ -32,6 +32,10 @@ import { DisposableCollection } from '@theia/core/lib/common/disposable';
 import { Disposable } from './types-impl';
 import { WorkspaceExtImpl } from './workspace';
 import * as Converters from './type-converters';
+import { BinaryBuffer } from '@theia/core/lib/common/buffer';
+//import { Schemes as Schemas } from '../common/uri-components';
+//import { hash } from './hash';
+
 
 export class CustomEditorsExtImpl implements CustomEditorsExt {
     private readonly proxy: CustomEditorsMain;
@@ -83,7 +87,7 @@ export class CustomEditorsExtImpl implements CustomEditorsExt {
         );
     }
 
-    async $createCustomDocument(resource: UriComponents, viewType: string, backupId: string | undefined, cancellation: CancellationToken): Promise<{
+    async $createCustomDocument(resource: UriComponents, viewType: string, backupId: string | undefined, untitledDocumentData: BinaryBuffer | undefined, cancellation: CancellationToken): Promise<{
         editable: boolean;
     }> {
         const entry = this.editorProviders.get(viewType);
@@ -215,6 +219,17 @@ export class CustomEditorsExtImpl implements CustomEditorsExt {
         return provider.saveCustomDocumentAs(entry.document, URI.revive(targetResource), cancellation);
     }
 
+    async $backup(resourceComponents: UriComponents, viewType: string, cancellation: CancellationToken): Promise<string> {
+        const entry = this.getCustomDocumentEntry(viewType, resourceComponents);
+        const provider = this.getCustomEditorProvider(viewType);
+
+        const backup = await provider.backupCustomDocument(entry.document, {
+            destination: entry.getNewBackupUri(),
+        }, cancellation);
+        entry.updateBackup(backup);
+        return backup.id;
+    }
+
     private getCustomEditorProvider(viewType: string): theia.CustomEditorProvider {
         const entry = this.editorProviders.get(viewType);
         const provider = entry?.provider;
@@ -235,13 +250,24 @@ function isEditEvent(e: theia.CustomDocumentContentChangeEvent | theia.CustomDoc
     return typeof (e as theia.CustomDocumentEditEvent).undo === 'function'
         && typeof (e as theia.CustomDocumentEditEvent).redo === 'function';
 }
-
+/*
+function hashPath(resource: URI): string {
+    const str = resource.scheme === Schemas.file || resource.scheme === Schemas.untitled ? resource.fsPath : resource.toString();
+    return hash(str) + '';
+}
+*/
 class CustomDocumentStoreEntry {
+
+    private backupCounter = 1;
+
     constructor(
-        readonly document: theia.CustomDocument,
+        public readonly document: theia.CustomDocument,
+        private readonly storagePath: URI | undefined,
     ) { }
 
     private readonly edits = new Cache<theia.CustomDocumentEditEvent>('custom documents');
+
+    private backup?: theia.CustomDocumentBackup;
 
     addEdit(item: theia.CustomDocumentEditEvent): number {
         return this.edits.add([item]);
@@ -249,16 +275,41 @@ class CustomDocumentStoreEntry {
 
     async undo(editId: number, isDirty: boolean): Promise<void> {
         await this.getEdit(editId).undo();
+        if (!isDirty) {
+            this.disposeBackup();
+        }
     }
 
     async redo(editId: number, isDirty: boolean): Promise<void> {
         await this.getEdit(editId).redo();
+        if (!isDirty) {
+            this.disposeBackup();
+        }
     }
 
     disposeEdits(editIds: number[]): void {
         for (const id of editIds) {
             this.edits.delete(id);
         }
+    }
+
+    getNewBackupUri(): URI {
+        if (!this.storagePath) {
+            throw new Error('Backup requires a valid storage path');
+        }
+        const fileName = (this.document.uri) + (this.backupCounter.toString());
+        this.backupCounter++;
+        return URI.joinPath(this.storagePath, fileName);
+    }
+
+    updateBackup(backup: theia.CustomDocumentBackup): void {
+        this.backup?.delete();
+        this.backup = backup;
+    }
+
+    disposeBackup(): void {
+        this.backup?.delete();
+        this.backup = undefined;
     }
 
     private getEdit(editId: number): theia.CustomDocumentEditEvent {
@@ -317,12 +368,12 @@ class CustomDocumentStore {
         return this.documents.get(this.key(viewType, resource));
     }
 
-    add(viewType: string, document: theia.CustomDocument): CustomDocumentStoreEntry {
+    add(viewType: string, document: theia.CustomDocument, storagePath?: URI): CustomDocumentStoreEntry {
         const key = this.key(viewType, document.uri);
         if (this.documents.has(key)) {
             throw new Error(`Document already exists for viewType:${viewType} resource:${document.uri}`);
         }
-        const entry = new CustomDocumentStoreEntry(document);
+        const entry = new CustomDocumentStoreEntry(document, storagePath);
         this.documents.set(key, entry);
         return entry;
     }
