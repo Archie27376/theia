@@ -76,13 +76,19 @@ export namespace CommonMenus {
 
     export const VIEW = [...MAIN_MENU_BAR, '4_view'];
     export const VIEW_PRIMARY = [...VIEW, '0_primary'];
-    export const VIEW_VIEWS = [...VIEW, '1_views'];
-    export const VIEW_LAYOUT = [...VIEW, '2_layout'];
-    export const VIEW_TOGGLE = [...VIEW, '3_toggle'];
+    export const VIEW_APPEARANCE = [...VIEW, '1_appearance'];
+    export const VIEW_APPEARANCE_SUBMENU = [...VIEW_APPEARANCE, '1_appearance_submenu'];
+    export const VIEW_APPEARANCE_SUBMENU_SCREEN = [...VIEW_APPEARANCE_SUBMENU, '2_appearance_submenu_screen'];
+    export const VIEW_APPEARANCE_SUBMENU_BAR = [...VIEW_APPEARANCE_SUBMENU, '3_appearance_submenu_bar'];
+    export const VIEW_EDITOR_SUBMENU = [...VIEW_APPEARANCE, '2_editor_submenu'];
+    export const VIEW_EDITOR_SUBMENU_SPLIT = [...VIEW_EDITOR_SUBMENU, '1_editor_submenu_split'];
+    export const VIEW_EDITOR_SUBMENU_ORTHO = [...VIEW_EDITOR_SUBMENU, '2_editor_submenu_ortho'];
+    export const VIEW_VIEWS = [...VIEW, '2_views'];
+    export const VIEW_LAYOUT = [...VIEW, '3_layout'];
+    export const VIEW_TOGGLE = [...VIEW, '4_toggle'];
 
     export const SETTINGS_OPEN = [...SETTINGS_MENU, '1_settings_open'];
     export const SETTINGS__THEME = [...SETTINGS_MENU, '2_settings_theme'];
-
     // last menu item
     export const HELP = [...MAIN_MENU_BAR, '9_help'];
 
@@ -231,6 +237,11 @@ export namespace CommonCommands {
         category: VIEW_CATEGORY,
         label: 'Toggle Maximized'
     }, 'theia/core/common/toggleMaximized', VIEW_CATEGORY_KEY);
+    export const SHOW_MENU_BAR = Command.toLocalizedCommand({
+        id: 'window.menuBarVisibility',
+        category: VIEW_CATEGORY,
+        label: 'Show Menu Bar'
+    }, 'vscode/layoutActions/miShowMenuBar', VIEW_CATEGORY_KEY);
     export const OPEN_VIEW = Command.toLocalizedCommand({
         id: 'core.openView',
         category: VIEW_CATEGORY,
@@ -285,7 +296,6 @@ export namespace CommonCommands {
         id: 'workbench.action.configureLanguage',
         label: 'Configure Display Language'
     }, 'vscode/localizationsActions/configureLocale');
-
 }
 
 export const supportCut = browser.isNative || document.queryCommandSupported('cut');
@@ -532,18 +542,18 @@ export class CommonFrontendContribution implements FrontendApplicationContributi
             order: '3'
         });
 
-        registry.registerMenuAction(CommonMenus.VIEW_LAYOUT, {
+        registry.registerMenuAction(CommonMenus.VIEW_APPEARANCE_SUBMENU_BAR, {
             commandId: CommonCommands.TOGGLE_BOTTOM_PANEL.id,
-            order: '0'
+            order: '1'
         });
-        registry.registerMenuAction(CommonMenus.VIEW_LAYOUT, {
+        registry.registerMenuAction(CommonMenus.VIEW_APPEARANCE_SUBMENU_BAR, {
             commandId: CommonCommands.TOGGLE_STATUS_BAR.id,
-            order: '1',
-            label: 'Toggle Status Bar'
+            order: '2',
+            label: nls.localize('vscode/layoutActions/toggleStatusbar', 'Toggle Status Bar')
         });
-        registry.registerMenuAction(CommonMenus.VIEW_LAYOUT, {
+        registry.registerMenuAction(CommonMenus.VIEW_APPEARANCE_SUBMENU_BAR, {
             commandId: CommonCommands.COLLAPSE_ALL_PANELS.id,
-            order: '2'
+            order: '3'
         });
 
         registry.registerMenuAction(SHELL_TABBAR_CONTEXT_MENU, {
@@ -571,10 +581,15 @@ export class CommonFrontendContribution implements FrontendApplicationContributi
             label: CommonCommands.COLLAPSE_PANEL.label,
             order: '4'
         });
-        registry.registerMenuAction(SHELL_TABBAR_CONTEXT_MENU, {
+        registry.registerMenuAction(CommonMenus.VIEW_APPEARANCE_SUBMENU_SCREEN, {
             commandId: CommonCommands.TOGGLE_MAXIMIZED.id,
             label: CommonCommands.TOGGLE_MAXIMIZED.label,
             order: '5'
+        });
+        registry.registerMenuAction(CommonMenus.VIEW_APPEARANCE_SUBMENU_BAR, {
+            commandId: CommonCommands.SHOW_MENU_BAR.id,
+            label: nls.localize('vscode/layoutActions/toggleMenuBar', 'Toggle Menu Bar'),
+            order: '0'
         });
         registry.registerMenuAction(CommonMenus.HELP, {
             commandId: CommonCommands.ABOUT_COMMAND.id,
@@ -599,6 +614,8 @@ export class CommonFrontendContribution implements FrontendApplicationContributi
         registry.registerMenuAction(CommonMenus.SETTINGS__THEME, {
             commandId: CommonCommands.SELECT_ICON_THEME.id
         });
+
+        registry.registerSubmenu(CommonMenus.VIEW_APPEARANCE_SUBMENU, 'Appearance');
     }
 
     registerCommands(commandRegistry: CommandRegistry): void {
@@ -787,6 +804,19 @@ export class CommonFrontendContribution implements FrontendApplicationContributi
         });
         commandRegistry.registerCommand(CommonCommands.TOGGLE_STATUS_BAR, {
             execute: () => this.preferenceService.updateValue('workbench.statusBar.visible', !this.preferences['workbench.statusBar.visible'])
+        });
+        commandRegistry.registerCommand(CommonCommands.SHOW_MENU_BAR, {
+            isEnabled: () => !isOSX,
+            isVisible: () => !isOSX,
+            execute: () => {
+                const menuBarVisibility = 'window.menuBarVisibility';
+                const visibility = this.preferences[menuBarVisibility];
+                if (visibility !== 'compact') {
+                    this.preferenceService.updateValue(menuBarVisibility, 'compact');
+                } else {
+                    this.preferenceService.updateValue(menuBarVisibility, 'classic');
+                }
+            }
         });
         commandRegistry.registerCommand(CommonCommands.TOGGLE_MAXIMIZED, {
             isEnabled: (event?: Event) => this.canToggleMaximized(event),

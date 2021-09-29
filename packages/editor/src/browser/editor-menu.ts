@@ -108,6 +108,43 @@ export class EditorMenuContribution implements MenuContribution {
             label: nls.localize('vscode/editor.contribution/closeEditor', 'Close Editor'),
             order: '1'
         });
+        registry.registerMenuAction(CommonMenus.VIEW_EDITOR_SUBMENU_SPLIT, {
+            commandId: EditorCommands.SPLIT_EDITOR_RIGHT.id,
+            label: nls.localize('vscode/editorActions/splitEditorGroupRight', 'Split Editor Right'),
+            order: '0'
+        });
+
+        registry.registerMenuAction(CommonMenus.VIEW_EDITOR_SUBMENU_SPLIT, {
+            commandId: EditorCommands.SPLIT_EDITOR_LEFT.id,
+            label: nls.localize('vscode/editorActions/splitEditorGroupLeft', 'Split Editor Left'),
+            order: '1'
+        });
+
+        registry.registerMenuAction(CommonMenus.VIEW_EDITOR_SUBMENU_SPLIT, {
+            commandId: EditorCommands.SPLIT_EDITOR_UP.id,
+            label: nls.localize('vscode/editorActions/splitEditorGroupUp', 'Split Editor Up'),
+            order: '2'
+        });
+
+        registry.registerMenuAction(CommonMenus.VIEW_EDITOR_SUBMENU_SPLIT, {
+            commandId: EditorCommands.SPLIT_EDITOR_DOWN.id,
+            label: nls.localize('vscode/editorActions/splitEditorGroupDown', 'Split Editor Down'),
+            order: '3'
+        });
+
+        registry.registerMenuAction(CommonMenus.VIEW_EDITOR_SUBMENU_ORTHO, {
+            commandId: EditorCommands.SPLIT_EDITOR_HORIZONTAL.id,
+            label: nls.localize('theia/editor/splitHorizontal', 'Split Editor Horizontal'),
+            order: '1'
+        });
+
+        registry.registerMenuAction(CommonMenus.VIEW_EDITOR_SUBMENU_ORTHO, {
+            commandId: EditorCommands.SPLIT_EDITOR_VERTICAL.id,
+            label: nls.localize('theia/editor/splitVertical', 'Split Editor Vertical'),
+            order: '2'
+        });
+
+        registry.registerSubmenu(CommonMenus.VIEW_EDITOR_SUBMENU, nls.localize('vscode/editor.contribution/miEditorLayout', 'Editor Layout'));
     }
 
 }
