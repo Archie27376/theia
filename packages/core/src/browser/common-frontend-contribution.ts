@@ -76,9 +76,13 @@ export namespace CommonMenus {
 
     export const VIEW = [...MAIN_MENU_BAR, '4_view'];
     export const VIEW_PRIMARY = [...VIEW, '0_primary'];
-    export const VIEW_VIEWS = [...VIEW, '1_views'];
-    export const VIEW_LAYOUT = [...VIEW, '2_layout'];
-    export const VIEW_TOGGLE = [...VIEW, '3_toggle'];
+    export const VIEW_EDITOR = [...VIEW, '1_editor'];
+    export const VIEW_EDITOR_SUBMENU = [...VIEW_EDITOR, '1_editor_submenu'];
+    export const VIEW_EDITOR_SUBMENU_SPLIT = [...VIEW_EDITOR_SUBMENU, '1_editor_submenu_split'];
+    export const VIEW_EDITOR_SUBMENU_ORTHO = [...VIEW_EDITOR_SUBMENU, '2_editor_submenu_ortho'];
+    export const VIEW_VIEWS = [...VIEW, '2_views'];
+    export const VIEW_LAYOUT = [...VIEW, '3_layout'];
+    export const VIEW_TOGGLE = [...VIEW, '4_toggle'];
 
     export const SETTINGS_OPEN = [...SETTINGS_MENU, '1_settings_open'];
     export const SETTINGS__THEME = [...SETTINGS_MENU, '2_settings_theme'];

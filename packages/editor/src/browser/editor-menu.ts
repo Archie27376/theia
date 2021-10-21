@@ -102,6 +102,44 @@ export class EditorMenuContribution implements MenuContribution {
             label: 'Render Whitespace',
             order: '2'
         });
+
+        registry.registerMenuAction(CommonMenus.VIEW_EDITOR_SUBMENU_SPLIT, {
+            commandId: EditorCommands.SPLIT_EDITOR_RIGHT.id,
+            label: 'Split Editor Right',
+            order: '0'
+        });
+
+        registry.registerMenuAction(CommonMenus.VIEW_EDITOR_SUBMENU_SPLIT, {
+            commandId: EditorCommands.SPLIT_EDITOR_LEFT.id,
+            label: 'Split Editor Left',
+            order: '1'
+        });
+
+        registry.registerMenuAction(CommonMenus.VIEW_EDITOR_SUBMENU_SPLIT, {
+            commandId: EditorCommands.SPLIT_EDITOR_UP.id,
+            label: 'Split Editor Up',
+            order: '2'
+        });
+
+        registry.registerMenuAction(CommonMenus.VIEW_EDITOR_SUBMENU_SPLIT, {
+            commandId: EditorCommands.SPLIT_EDITOR_DOWN.id,
+            label: 'Split Editor Down',
+            order: '3'
+        });
+
+        registry.registerMenuAction(CommonMenus.VIEW_EDITOR_SUBMENU_ORTHO, {
+            commandId: EditorCommands.SPLIT_EDITOR_HORIZONTAL.id,
+            label: 'Split Editor Horizontal',
+            order: '0'
+        });
+
+        registry.registerMenuAction(CommonMenus.VIEW_EDITOR_SUBMENU_ORTHO, {
+            commandId: EditorCommands.SPLIT_EDITOR_VERTICAL.id,
+            label: 'Split Editor Vertical',
+            order: '1'
+        });
+
+        registry.registerSubmenu(CommonMenus.VIEW_EDITOR_SUBMENU, 'Editor Layout');
     }
 
 }
