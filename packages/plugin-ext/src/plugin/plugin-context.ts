@@ -426,7 +426,7 @@ export function createAPIFactory(
             registerTreeDataProvider<T>(viewId: string, treeDataProvider: theia.TreeDataProvider<T>): Disposable {
                 return treeViewsExt.registerTreeDataProvider(plugin, viewId, treeDataProvider);
             },
-            createTreeView<T>(viewId: string, options: { treeDataProvider: theia.TreeDataProvider<T> }): theia.TreeView<T> {
+            createTreeView<T>(viewId: string, options: theia.TreeViewOptions<T>): theia.TreeView<T> {
                 return treeViewsExt.createTreeView(plugin, viewId, options);
             },
             withProgress<R>(

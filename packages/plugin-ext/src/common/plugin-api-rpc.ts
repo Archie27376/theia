@@ -662,7 +662,7 @@ export interface TreeViewRevealOptions {
 }
 
 export interface TreeViewsMain {
-    $registerTreeDataProvider(treeViewId: string): void;
+    $registerTreeDataProvider(treeViewId: string, options: { showCollapseAll: boolean, canSelectMany: boolean }): void;
     $unregisterTreeDataProvider(treeViewId: string): void;
     $refresh(treeViewId: string): Promise<void>;
     $reveal(treeViewId: string, elementParentChain: string[], options: TreeViewRevealOptions): Promise<any>;

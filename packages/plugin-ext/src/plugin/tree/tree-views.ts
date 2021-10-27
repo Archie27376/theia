@@ -18,7 +18,7 @@
 
 import {
     TreeDataProvider, TreeView, TreeViewExpansionEvent, TreeItem2, TreeItemLabel,
-    TreeViewSelectionChangeEvent, TreeViewVisibilityChangeEvent
+    TreeViewSelectionChangeEvent, TreeViewVisibilityChangeEvent, TreeViewOptions
 } from '@theia/plugin';
 // TODO: extract `@theia/util` for event, disposable, cancellation and common types
 // don't use @theia/core directly from plugin host
@@ -60,12 +60,12 @@ export class TreeViewsExtImpl implements TreeViewsExt {
         });
     }
 
-    createTreeView<T>(plugin: Plugin, treeViewId: string, options: { treeDataProvider: TreeDataProvider<T> }): TreeView<T> {
+    createTreeView<T>(plugin: Plugin, treeViewId: string, options: TreeViewOptions<T>): TreeView<T> {
         if (!options || !options.treeDataProvider) {
             throw new Error('Options with treeDataProvider is mandatory');
         }
 
-        const treeView = new TreeViewExtImpl(plugin, treeViewId, options.treeDataProvider, this.proxy, this.commandRegistry.converter);
+        const treeView = new TreeViewExtImpl(plugin, treeViewId, options.treeDataProvider, this.proxy, this.commandRegistry.converter, options);
         this.treeViews.set(treeViewId, treeView);
 
         return {
@@ -186,9 +186,10 @@ class TreeViewExtImpl<T> implements Disposable {
         private treeViewId: string,
         private treeDataProvider: TreeDataProvider<T>,
         private proxy: TreeViewsMain,
-        readonly commandsConverter: CommandsConverter) {
+        readonly commandsConverter: CommandsConverter,
+        private options: TreeViewOptions<T>) {
 
-        proxy.$registerTreeDataProvider(treeViewId);
+        proxy.$registerTreeDataProvider(treeViewId, { showCollapseAll: !!this.options.showCollapseAll, canSelectMany: !!this.options.canSelectMany });
         this.toDispose.push(Disposable.create(() => this.proxy.$unregisterTreeDataProvider(treeViewId)));
 
         if (treeDataProvider.onDidChangeTreeData) {
